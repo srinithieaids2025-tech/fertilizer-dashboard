@@ -2,8 +2,9 @@ import streamlit as st
 import pandas as pd
 import joblib
 
-st.set_page_config(page_title="Fertilizer Recommendation Dashboard", layout="wide")
+st.set_page_config(page_title="Fertilizer Recommendation Dashboard", layout="wide", page_icon="🌾")
 st.title("🌱 Fertilizer Recommendation Dashboard")
+st.caption("Built with a Random Forest model — SHAP-based feature importance included")
 st.write("Enter your field's soil and crop conditions to get a fertilizer recommendation.")
 @st.cache_resource
 def load_models():
@@ -18,9 +19,10 @@ model, dosage_model, le_soil, le_crop, le_fert = load_models()
 
 feature_cols = ['Temparature', 'Humidity ', 'Moisture', 'Nitrogen', 'Potassium', 'Phosphorous', 'soil_encoded', 'crop_encoded2']
 st.sidebar.header("Field Conditions")
-
+st.sidebar.markdown("### 🌾 Crop Info")
 soil_type = st.sidebar.selectbox("Soil Type", options=list(le_soil.classes_))
 crop_type = st.sidebar.selectbox("Crop Type", options=list(le_crop.classes_))
+st.sidebar.markdown("### 🧪 Soil Nutrients")
 temperature = st.sidebar.slider("Temperature (°C)", 0, 50, 25)
 humidity = st.sidebar.slider("Humidity (%)", 0, 100, 50)
 moisture = st.sidebar.slider("Moisture (%)", 0, 100, 40)
@@ -44,7 +46,7 @@ if predict_button:
     top_confidence = proba[top_idx]
 
     st.subheader("Recommendation")
-    col1, col2 = st.columns(2)
+    col1, col2, col3 = st.columns(3)
     col1.metric("Recommended Fertilizer", top_fertilizer)
     col2.metric("Confidence", f"{top_confidence:.1%}")
 
@@ -63,7 +65,7 @@ if predict_button:
         columns=feature_cols + ['fertilizer_encoded2']
     )
     estimated_dosage = dosage_model.predict(dosage_input)[0]
-    st.metric("Recommended Dosage", f"{estimated_dosage:.1f} kg/hectare")
+    col3.metric("Recommended Dosage", f"{estimated_dosage:.1f} kg/hectare")
     st.subheader("Cost & Sustainability Comparison")
 
     fertilizer_profile = {
